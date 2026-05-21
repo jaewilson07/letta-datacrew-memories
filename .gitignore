@@ -31,8 +31,8 @@ domo-docs-hub/
 # Libraries (separate repos)
 libraries/
 
-# Agent skills (internal)
-.agents/
+# Agent runtime outputs (gitignored)
+.agents/**/EXPORTS/
 
 # Letta memory filesystem (synced separately, 128MB+ with binaries)
 dc_public_memories/
