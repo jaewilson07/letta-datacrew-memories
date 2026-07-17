@@ -16,12 +16,14 @@ datacrew-private-memories/
 │   └── platform/                    ← Shared platform knowledge (infra, Letta)
 ├── reference/                       ← Shared, on-demand (all agents can read)
 │   ├── index.md
+│   ├── clients/                     ← Industry research, pain points, pattern analysis
 │   ├── domo/                        ← Domo API patterns, crew-dcs templates
 │   ├── patterns/                    ← Generalized lessons, second brain research
 │   └── project/                     ← Project-specific reference docs
 ├── users/                           ← DUG community member profiles (shared)
 ├── agents/                          ← Per-agent private namespace
 │   ├── datacrew/                    ← DataCrew agent (agent-55e609e7)
+│   │   └── clients/                 ← Real customer data (private — contact, pipeline, outreach)
 │   ├── idrisbot/                    ← IdrisBot agent (agent-0604eb6c)
 │   └── emmabot/                     ← EmmaBot agent (agent-5afcfa48)
 ├── proposals/                       ← Feature proposals (shared)

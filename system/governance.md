@@ -34,7 +34,9 @@ If any answer is no, it goes to `reference/` or `agents/<name>/`.
 - Each agent's system prompt includes: "Do not read or write to other agents' private directories"
 - `.gitignore` excludes: secrets, `.env`, conversation logs, large binaries
 - User profiles in `users/` are shared but should not contain private personal information
-- Client data goes in `agents/datacrew/clients/` only — never in shared directories
+- **Real customer data** (contact details, pipeline status, outreach strategy, rates) goes in `agents/datacrew/clients/` only — never in shared directories
+- **Industry research** (pain points, market analysis, hypotheses, pattern analysis) goes in `reference/clients/` — shared, all agents can read
+- IdrisBot is a mentor/product developer — it does not need direct access to real customer data. If IdrisBot needs customer context, it asks DataCrew.
 
 ## Commit Conventions
 
