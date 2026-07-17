@@ -236,21 +236,23 @@ uv run python .agents/skills/pattern-hunter/scripts/ingest_to_kb.py \
 
 ### Node 6: Write to Memory Store
 
-**Goal:** Persist a structured client memory in the shared memory store so future sessions can recall it.
+**Goal:** Persist industry research as shared context in the shared memory store so all agents can recall it.
 
-After the brief is produced, write (or update) a memory file at:
+Pattern Hunter output is **research**, not customer data. It goes in the shared `reference/` namespace so any agent (DataCrew, IdrisBot) can read it. Real customer information (contact details, pipeline status, outreach strategy) belongs in `agents/datacrew/clients/` — see the customer-dossier skill for that.
+
+After the brief is produced, write (or update) a research file at:
 
 ```
-/home/jaewilson07/GitHub/datacrew-private-memories/agents/datacrew/clients/<slug>.md
+/home/jaewilson07/GitHub/datacrew-private-memories/reference/clients/<slug>.md
 ```
 
 **Format** (YAML frontmatter + structured content):
 
 ```markdown
 ---
-description: <Operator Name> — Pattern Hunter brief summary, pain points, and recommended fixes.
+description: <Operator Name> — industry research, pain points, and recommended fixes.
 ---
-# <Operator Name> — Pattern Hunter Brief
+# <Operator Name> — Pattern Hunter Research
 
 **Generated:** <YYYY-MM-DD>
 **Source:** Pattern Hunter run on <business type or URL>
@@ -271,23 +273,23 @@ description: <Operator Name> — Pattern Hunter brief summary, pain points, and 
 ## Links
 - GDoc tab: <link if created>
 - mdrag KB: <link if ingested>
-- [[agents/datacrew/clients/<slug>]] — this file
+- [[reference/clients/<slug>]] — this file
 ```
 
 **Rules:**
 - Use kebab-case for the slug (e.g., `blueyeti`, `trailer-rental-co`)
-- If a file already exists for this client, **update it** — don't create a duplicate
+- If a file already exists, **update it** — don't create a duplicate
 - Pull before writing and push after (shared repo is collaborative)
-- Include `[[path]]` cross-references to related clients or reference docs where relevant
-- Never put client financial details, rates, or pipeline info in shared directories — only in `agents/datacrew/clients/`
+- Include `[[path]]` cross-references to related research or reference docs
+- This is **shared research** — no real customer contact details, rates, or pipeline status here. Those go in `agents/datacrew/clients/` via the customer-dossier skill.
 
 ```bash
 # Pull latest, write the file, commit and push
 cd /home/jaewilson07/GitHub/datacrew-private-memories
 git pull
-# ... write/update agents/datacrew/clients/<slug>.md ...
-git add agents/datacrew/clients/<slug>.md
-git commit -m "feat: pattern hunter brief for <Operator Name> (<YYYY-MM-DD>)"
+# ... write/update reference/clients/<slug>.md ...
+git add reference/clients/<slug>.md
+git commit -m "feat: pattern hunter research for <Operator Name> (<YYYY-MM-DD>)"
 git push
 ```
 
