@@ -1,4 +1,19 @@
 repos:
+  - repo: local
+    hooks:
+      - id: block-skill-quality-drift
+        name: Block skill quality drift (vally lint ratchet)
+        entry: python scripts/check_skill_quality.py
+        language: system
+        pass_filenames: false
+        files: '^\.agents/skills/'
+      - id: block-runbook-quality-drift
+        name: Block runbook quality drift (vally lint ratchet)
+        entry: python scripts/check_skill_quality.py --path .agents/runbooks --baseline .runbook-quality-baseline.json
+        language: system
+        pass_filenames: false
+        files: '^\.agents/runbooks/'
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
