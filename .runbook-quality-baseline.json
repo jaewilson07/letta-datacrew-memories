@@ -1,0 +1,4 @@
+{
+  "_comment": "Grandfathered runbooks failing `vally lint` (spec-compliance / valid-refs), pending burndown. Drain entries as runbooks are fixed; do NOT add new ones. Regenerate with: python3 scripts/check_skill_quality.py --path <dir> --update-baseline",
+  "known_failing_skills": []
+}

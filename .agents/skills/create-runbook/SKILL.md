@@ -1,6 +1,9 @@
 ---
 name: create-runbook
-description: Creates SOP-style runbooks for recurring tasks with executable scripts. Use for: "create runbook", "turn this into SOP", "standardize recurring task".
+description: >
+  Creates SOP-style runbooks for recurring tasks with executable scripts.
+  Use for: "create runbook", "turn this into SOP", "standardize recurring
+  task".
 metadata:
   version: 2.0.0
   updated: 2026-04-03
