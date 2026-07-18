@@ -1,0 +1,10 @@
+# clone-gdrive-mirror — Drive folder tree(s) to materialize into a local mirror.
+#
+# Each `sources` entry clones one Google Drive folder recursively into `dest`.
+# `dest` is relative to this repo's root (datacrew-private-memories/) unless
+# absolute. Add an entry to mirror another tree.
+
+sources:
+  - name: datacrew-customers
+    folder_id: "17_UlOsQpyniJvypl2rSGW6vEjNd80fDy"   # Drive /customers
+    dest: "agents/datacrew/clients"

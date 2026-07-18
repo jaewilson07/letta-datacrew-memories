@@ -43,3 +43,6 @@ datacrew-site/
 
 # Legacy datacrew worktree (separate repo, DO NOT commit)
 /datacrew/
+
+# Skill-scoped generated outputs (create-skill EXPORTS policy)
+**/EXPORTS/
