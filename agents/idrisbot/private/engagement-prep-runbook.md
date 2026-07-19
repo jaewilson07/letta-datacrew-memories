@@ -1,7 +1,7 @@
 # Engagement Prep Runbook
 
-**Version:** 1.0
-**Purpose:** Define the repeatable process an analyst (or agent) follows to prepare research artifacts for a consulting engagement. The output is a set of support artifacts that an agent uses to guide customer onboarding and assessment.
+**Version:** 1.1
+**Purpose:** Define the repeatable process an analyst (or agent) follows to prepare research artifacts for a consulting engagement. The output is a set of support artifacts that an agent uses to guide customer onboarding and assessment. All artifacts are persisted to the mdrag knowledge base for cross-session retrieval.
 
 ---
 
@@ -28,6 +28,96 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 
 ---
 
+## mdrag Integration
+
+All artifacts produced by this runbook are persisted to the mdrag knowledge base (KB) in the `datacrew` collection. This ensures:
+- **Cross-session retrieval** — any agent session can query prior research via RAG
+- **Compounding knowledge** — each engagement enriches the KB for the next
+- **Source persistence** — crawled URLs are ingested into the KB, not just archived to disk
+
+### mdrag API Reference
+
+**Base URL:** `https://wiki.datacrew.space`
+**Auth:** `Authorization: Bearer $DATACREW_API_TOKEN` (dc_ JWT, available in environment)
+**Collection:** `datacrew` (collection_id: `6a274087d4b0a3ad1b028ae8`)
+
+**Key endpoints (REST):**
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| POST | `/api/v1/searxng/search` | Web search via SearXNG |
+| POST | `/api/v1/crawl/url` | Crawl a single URL → markdown |
+| POST | `/api/v1/ingest/web` | Ingest a URL into the KB (crawl + chunk + embed) |
+| POST | `/api/v1/ingest/text` | Save text directly to the KB |
+| POST | `/api/v1/query/` | RAG query against the KB |
+| GET | `/api/v1/collections/` | List collections |
+| GET | `/api/v1/health` | Health check |
+
+**Required headers for all calls:**
+- `Authorization: Bearer $DATACREW_API_TOKEN`
+- `Content-Type: application/json` (for POST)
+- Use `--location-trusted` with curl (endpoints 307-redirect to trailing slash)
+
+### mdrag Operations Per Step
+
+| Step | mdrag Operation | What Gets Saved |
+|------|----------------|-----------------|
+| Step 1 | `POST /api/v1/ingest/text` | IndustryResearch artifact (markdown) |
+| Step 1 | `POST /api/v1/ingest/web` | Source URLs crawled during research |
+| Step 2 | `POST /api/v1/ingest/text` | CompanyDossier artifact (markdown) |
+| Step 3 | `POST /api/v1/ingest/text` | IndustryPatterns artifact (markdown) |
+| Step 4 | `POST /api/v1/ingest/text` | CompanyPatterns artifact (markdown) |
+| Step 5 | `POST /api/v1/ingest/text` | EngagementPrep artifact (markdown) |
+| Any step | `POST /api/v1/query/` | Query prior research in the KB |
+| Feedback | `POST /api/v1/ingest/text` | Interview findings, updated hypotheses |
+
+### Saving artifacts to mdrag
+
+```bash
+# Save a text artifact to the datacrew collection
+curl -sS --location-trusted -H "Authorization: Bearer $DATACREW_API_TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  "https://wiki.datacrew.space/api/v1/ingest/text" \
+  -d '{
+    "content": "<markdown content of the artifact>",
+    "title": "<descriptive title>",
+    "source_type": "text",
+    "collection_id": "6a274087d4b0a3ad1b028ae8"
+  }'
+```
+
+### Ingesting source URLs to mdrag
+
+```bash
+# Ingest a crawled URL into the datacrew collection
+curl -sS --location-trusted -H "Authorization: Bearer $DATACREW_API_TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  "https://wiki.datacrew.space/api/v1/ingest/web" \
+  -d '{
+    "url": "<source URL>",
+    "source_type": "web",
+    "source_group": "datacrew"
+  }'
+```
+
+### Querying the KB for prior research
+
+```bash
+# RAG query against the datacrew collection
+curl -sS --location-trusted -H "Authorization: Bearer $DATACREW_API_TOKEN" \
+  -H "Content-Type: application/json" -X POST \
+  "https://wiki.datacrew.space/api/v1/query/" \
+  -d '{
+    "query": "<natural language question>",
+    "source_group": "datacrew",
+    "match_count": 5
+  }'
+```
+
+> **Note:** RAG query results may have indexing lag right after ingest. If a query returns "I don't know" right after saving, wait 30-60 seconds and retry. For immediate synthesis, work from the file on disk.
+
+---
+
 ## Step 1: Industry Assessment
 
 **Goal:** Understand the industry — what it is, how it works, what KPIs matter, what benchmarks exist, what trends are shaping it.
@@ -37,9 +127,12 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 **How to run:**
 1. Check if cached research exists at `/projects/industry-analysis/{industry}/industry_research.md`
 2. If cached and <6 months old, load it and skip to Step 2
-3. If not cached, run the `/industry-analysis` skill (10 source category searches, synthesize into IndustryResearch artifact)
-4. Write to disk: `/projects/industry-analysis/{industry}/industry_research.json` + `.md`
-5. Copy to shared memory repo: `agents/idrisbot/private/{industry}-industry-research.md`
+3. **Query the mdrag KB** for prior industry research: `POST /api/v1/query/` with `"query": "{industry} industry research KPIs benchmarks", "source_group": "datacrew"` — if relevant results exist, use them to supplement cached research
+4. If not cached, run the `/industry-analysis` skill (10 source category searches, synthesize into IndustryResearch artifact)
+5. Write to disk: `/projects/industry-analysis/{industry}/industry_research.json` + `.md`
+6. Copy to shared memory repo: `agents/idrisbot/private/{industry}-industry-research.md`
+7. **Save to mdrag KB:** `POST /api/v1/ingest/text` with the IndustryResearch markdown, title `"Industry Research: {industry}"`, `collection_id: "6a274087d4b0a3ad1b028ae8"`
+8. **Ingest source URLs to mdrag:** For each key source URL used in the research, `POST /api/v1/ingest/web` with `source_group: "datacrew"` — this makes the original source content searchable in the KB
 
 **Output: IndustryResearch artifact**
 - Industry overview (market size, structure, key segments, industry structure)
@@ -53,7 +146,7 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 **Storage:**
 - Disk: `/projects/industry-analysis/{industry}/`
 - Shared: `agents/idrisbot/private/{industry}-industry-research.md`
-- KB: mdrag Datacrew collection (if available)
+- KB: mdrag `datacrew` collection (artifact + source URLs)
 
 **Reuse:** Cached per industry. Multiple companies in the same industry share the same research. Refresh when >6 months old or when major industry shifts occur.
 
@@ -68,8 +161,10 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 **How to run:**
 1. Check if a dossier exists at `agents/datacrew/clients/{slug}/`
 2. If it exists, load it and verify it's current (check `last_synced` date in frontmatter)
-3. If not, research the company (web search, LinkedIn, Crunchbase, PitchBook, company website)
-4. Extend the dossier with a **Data Infrastructure Map** (see below) — this is new and critical
+3. **Query the mdrag KB** for prior company research: `POST /api/v1/query/` with `"query": "{company name} company profile dossier", "source_group": "datacrew"`
+4. If not, research the company (web search, LinkedIn, Crunchbase, PitchBook, company website)
+5. Extend the dossier with a **Data Infrastructure Map** (see below) — this is new and critical
+6. **Save to mdrag KB:** `POST /api/v1/ingest/text` with the CompanyDossier markdown, title `"Company Dossier: {company name}"`, `collection_id: "6a274087d4b0a3ad1b028ae8"`
 
 **Output: CompanyDossier artifact**
 - Company profile (legal name, website, industry, founded, HQ, employees, ownership, revenue)
@@ -109,7 +204,8 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 
 **How to run:**
 1. Load the IndustryResearch artifact from Step 1
-2. For each of the top 10 problems, ask:
+2. **Query the mdrag KB** for additional industry context: `POST /api/v1/query/` with `"query": "{industry} recurring problems patterns KPI gaps", "source_group": "datacrew"` — this may surface prior research from other engagements in the same industry
+3. For each of the top 10 problems, ask:
    - Is this a structural problem (inherent to the industry) or a company-specific problem?
    - How common is this problem across companies in the industry? (universal, majority, niche)
    - What's the cost of NOT solving this problem? (dollar impact, risk exposure, opportunity cost)
@@ -144,7 +240,7 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 **Storage:**
 - Disk: `/projects/industry-analysis/{industry}/patterns.md`
 - Shared: `agents/idrisbot/private/{industry}-industry-patterns.md`
-- KB: mdrag Datacrew collection (if available)
+- KB: mdrag `datacrew` collection — save via `POST /api/v1/ingest/text` with title `"Industry Patterns: {industry}"`, `collection_id: "6a274087d4b0a3ad1b028ae8"`
 
 **Reuse:** Cached per industry alongside the IndustryResearch artifact. Update when industry research is refreshed.
 
@@ -160,7 +256,8 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 
 **How to run:**
 1. Load the CompanyDossier from Step 2
-2. Search for recent company news (last 6 months):
+2. **Query the mdrag KB** for prior company signals: `POST /api/v1/query/` with `"query": "{company name} recent news signals hiring leadership", "source_group": "datacrew"`
+3. Search for recent company news (last 6 months):
    - Contract wins/losses
    - Leadership changes
    - Hiring patterns (what roles are they posting? what does that signal?)
@@ -212,6 +309,7 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 **Storage:**
 - Shared: `agents/datacrew/clients/{slug}/patterns.md`
 - Synced: GDoc dossier (if synced)
+- KB: mdrag `datacrew` collection — save via `POST /api/v1/ingest/text` with title `"Company Patterns: {company name}"`, `collection_id: "6a274087d4b0a3ad1b028ae8"`
 
 **Reuse:** Per-company. Not reusable. Update after each engagement phase.
 
@@ -225,7 +323,8 @@ Industry Assessment → Company Assessment → Industry Pattern Hunter → Compa
 
 **How to run:**
 1. Load all four artifacts
-2. Build the **Worry Matrix**:
+2. **Query the mdrag KB** for relevant prior engagement preps: `POST /api/v1/query/` with `"query": "{company name} OR {industry} engagement prep hypotheses worry matrix", "source_group": "datacrew"` — prior preps may surface patterns or hypotheses relevant to this engagement
+3. Build the **Worry Matrix**:
    - For each industry problem (from Step 3), cross with company specifics (from Steps 2 and 4)
    - Ask: "Does this company's profile (size, stage, tech stack, leadership, business model) make this problem more or less likely to be acute for them?"
    - Score each: likelihood (high/medium/low) × impact (high/medium/low) = priority
@@ -336,6 +435,7 @@ What success looks like: ["I'd use this every day"]
 **Storage:**
 - Shared: `agents/idrisbot/private/{slug}-engagement-prep.md`
 - Also: `agents/idrisbot/private/{slug}-discovery-guide.md` (the interview guide portion)
+- KB: mdrag `datacrew` collection — save via `POST /api/v1/ingest/text` with title `"Engagement Prep: {company name}"`, `collection_id: "6a274087d4b0a3ad1b028ae8"` — this makes the full engagement prep searchable for future engagements
 
 **Reuse:** Per-company, per-engagement. Not reusable. Update after the interview with what was learned (see Feedback Loop).
 
@@ -369,6 +469,8 @@ After the Discovery interview (or any engagement phase), update the research:
    - What the client committed to (the assignment)
    - Next steps and timeline
 
+5. **Save interview findings to mdrag KB:** `POST /api/v1/ingest/text` with the interview findings markdown, title `"Interview Findings: {company name} — {date}"`, `collection_id: "6a274087d4b0a3ad1b028ae8"` — this makes the findings searchable for future engagements and closes the feedback loop in the KB
+
 This feedback loop ensures the research base compounds over time. Each engagement enriches the industry research and the company dossier, making the next engagement's prep faster and sharper.
 
 ---
@@ -398,16 +500,15 @@ Step 2: CompanyDossier
 
 ## Storage Map
 
-| Artifact | Location | Repo | Reuse |
-|----------|----------|------|-------|
-| IndustryResearch | `/projects/industry-analysis/{industry}/` | datacrew (gitignored) | Per-industry, cached |
-| IndustryResearch (shared) | `agents/idrisbot/private/{industry}-industry-research.md` | shared memory repo | Per-industry, cached |
-| IndustryPatterns | `/projects/industry-analysis/{industry}/patterns.md` | datacrew (gitignored) | Per-industry, cached |
-| IndustryPatterns (shared) | `agents/idrisbot/private/{industry}-industry-patterns.md` | shared memory repo | Per-industry, cached |
-| CompanyDossier | `agents/datacrew/clients/{slug}/company-contact-dossier/` | shared memory repo | Per-company |
-| CompanyPatterns | `agents/datacrew/clients/{slug}/patterns.md` | shared memory repo | Per-company |
-| EngagementPrep | `agents/idrisbot/private/{slug}-engagement-prep.md` | shared memory repo | Per-engagement |
-| Interview Guide | `agents/idrisbot/private/{slug}-discovery-guide.md` | shared memory repo | Per-engagement |
+| Artifact | Disk | Shared Memory Repo | mdrag KB | Reuse |
+|----------|------|-------------------|----------|-------|
+| IndustryResearch | `/projects/industry-analysis/{industry}/` | `agents/idrisbot/private/{industry}-industry-research.md` | `datacrew` collection + source URLs | Per-industry, cached |
+| IndustryPatterns | `/projects/industry-analysis/{industry}/patterns.md` | `agents/idrisbot/private/{industry}-industry-patterns.md` | `datacrew` collection | Per-industry, cached |
+| CompanyDossier | — | `agents/datacrew/clients/{slug}/company-contact-dossier/` | `datacrew` collection | Per-company |
+| CompanyPatterns | — | `agents/datacrew/clients/{slug}/patterns.md` | `datacrew` collection | Per-company |
+| EngagementPrep | — | `agents/idrisbot/private/{slug}-engagement-prep.md` | `datacrew` collection | Per-engagement |
+| Interview Guide | — | `agents/idrisbot/private/{slug}-discovery-guide.md` | `datacrew` collection | Per-engagement |
+| Interview Findings | — | — | `datacrew` collection | Per-engagement (feedback loop) |
 
 ## Relationship to Existing Skills and Runbooks
 
@@ -418,7 +519,11 @@ Step 2: CompanyDossier
 | `/pattern-hunter` runbook | **Renamed to "Positioning Audit."** This is a competitive positioning audit, not engagement prep. Different purpose, different output. The name "pattern hunter" is now used for Steps 3 and 4 (industry and company pattern hunters). |
 | Discovery interview framework | Step 5 produces the interview guide using the 6-stage Discovery flow |
 | AI CoS framework | Consumes the EngagementPrep artifacts to guide the ongoing engagement |
+| mdrag `research-and-archive` runbook | Step 1 uses mdrag for web search (SearXNG), URL crawling (crawl4ai), and KB ingestion |
+| mdrag `research-to-wiki-collection` runbook | Reference for collection management — artifacts go to the `datacrew` collection, browsable at `wiki.datacrew.space/collections/6a274087d4b0a3ad1b028ae8` |
+| mdrag `calling-mdrag-from-agents` guide | Auth, endpoints, and tool reference for all mdrag API calls in this runbook |
 
 ## Versioning
 
 - **v1.0** (2026-07-18): Initial runbook. Based on the Blue Raven Solutions engagement prep, the A&D industry analysis, and the 7-gap audit of the research process.
+- **v1.1** (2026-07-19): mdrag integration. All artifacts now persist to the mdrag `datacrew` collection for cross-session RAG retrieval. Source URLs ingested via `/api/v1/ingest/web`. Each step queries the KB for prior research before producing new artifacts. Feedback loop saves interview findings to the KB.
