@@ -51,17 +51,41 @@ Too generic. Doesn't tell the customer what they're actually getting. The entry 
 
 ## 2. The Sell
 
-### The Entry Offer: Discovery Sprint
+### The Product: AI Chief of Staff
+
+The product we're selling is an AI Chief of Staff — a personal assistant that tells you the important things. Not a dashboard you have to check. Not a report you have to read. An assistant that knows what matters to your business and tells you, every day, what's changed and what needs your attention.
+
+Here's why this is hard — and why we can sell it:
+
+**Layer 1: Personal context (easy)**
+A "Jarvis" or "Claude" assistant is easy. Connect the relevant connectors — calendar, Google Docs, wherever you do work — and you get information about your schedule, your upcoming meetings, the things you're working on. Anyone can build this. It's table stakes.
+
+**Layer 2: Industry context (medium)**
+Add a chatbot that handles your news feed — a daily digest tied to the key syndications you consume. "Here's what happened in your industry today." This is a step up, but it's still just aggregation. It tells you what happened. It doesn't tell you what it means for your business.
+
+**Layer 3: Company context (hard — this is where we sell)**
+"What's happening in my company that matters?" — that's the hard part. Not just "did my sales go up or down." Interpreting that to mean something requires context. Is that context in your head, or is it something measured and tracked in a systematic way?
+
+For most mid-market companies, the answer is: it's in the CFO's head. The CFO knows that a 3-day improvement in cash-to-cash cycle matters because they're managing a credit facility. The CFO knows that inventory turns below 3x means cash is trapped. The CFO knows that a delayed Boeing order will cascade into fill rate problems next quarter. But that context isn't anywhere the AI can see it. It's not in a system. It's not in a metric. It's in one person's head.
+
+**Our engagement gets it out of your head and into a system of metrics you can track over time.** KPIs, OKRs, benchmarks, leading indicators — the things that make the context explicit, measurable, and shareable. So the AI CoS has something to work with. So other people in the business can understand and help push the company in the same direction.
+
+That's why the engagement is necessary. Without it, the AI CoS is just Layer 1 + Layer 2 — a calendar assistant with a news feed. With it, the AI CoS knows what matters to YOUR business, monitors those metrics daily, and tells you when something needs your attention — with the context that makes it actionable.
+
+### How We Sell It
+
+The pitch isn't "buy an AI product." The pitch is: "You already know what matters to your business. But it's in your head. If you get hit by a bus, that context leaves with you. We help you get it out — into a system of metrics, benchmarked against your industry, monitored daily by an AI that tells you what changed and what to do about it."
+
+**The entry offer: Discovery Sprint ($5K-$8K, 2-3 weeks)**
 
 A bounded, priced engagement that does the scoping for the client. Not "give us $50K and we'll fix your problem" — "let's spend a few thousand dollars figuring out what your actual problem is and where the value is."
 
-**What the client gets:**
+What the client gets:
 - Industry-benchmarked KPI assessment (are your numbers good or bad compared to peers?)
 - Data source map (what data exists, where it lives, what's missing)
 - Prioritized roadmap of high-value projects (automate, decide better, scale)
 - A working KPI dashboard in Domo (the foundation, not the finish line)
 
-**How we sell it:**
 We walk in already knowing their industry and their company's specific challenges. Not a generic "tell me about your business" — but "Ryan, you're managing $500M across two acquired divisions with different systems. Do you have a single view of cash-to-cash cycle across both, or are you pulling spreadsheets?"
 
 That specificity is the product of the engagement prep runbook (described in Section 4). The research is done by AI, reviewed by the consultant, and takes hours instead of days. The client sees a consultant who comes prepared — not one who bills them to learn the industry on their dime.
@@ -76,19 +100,20 @@ That's the whole framework. It's the same discovery discipline management consul
 ### The Engagement Arc
 
 ```
-PAID DISCOVERY → IMPLEMENTATION → 3-MONTH CHECK-IN → ONGOING FRACTIONAL
-   (Sprint)        (Foundation)      (Baked in)          (AI CoS)
+DISCOVERY      → IMPLEMENTATION → 3-MONTH       → ONGOING AI CoS
+SPRINT           (FOUNDATION)      CHECK-IN         (FRACTIONAL)
+($5-8K, 2-3wk)   ($10-20K, 3-4wk)  (baked in)      ($3-5K/mo)
 ```
 
 1. **Discovery Sprint** ($5K-$8K, 2-3 weeks) — The entry offer. Industry research, company assessment, discovery interviews, KPI feasibility matrix, a working dashboard. The client gets a roadmap. We get the relationship. It wins either way.
 
-2. **Foundation Implementation** ($10K-$20K, 3-4 weeks) — If the client wants us to implement: build the KPI/OKR foundation in Domo, deploy the dashboard, wire up data pipelines. Discounted from the Sprint because they already invested in the roadmap.
+2. **Foundation Implementation** ($10K-$20K, 3-4 weeks) — If the client wants us to implement: build the KPI/OKR foundation in Domo, deploy the dashboard, wire up data pipelines. Discounted from the Sprint because they already invested in the roadmap. This is where the context gets out of the CFO's head and into a system.
 
 3. **3-Month Check-in** (Baked into implementation cost) — Another touchpoint, backed by something actually shipped. Is what's not working technology, or is it people and process? If it's the latter, that's the real opening for the ongoing fractional relationship.
 
-4. **Ongoing Fractional — AI CoS** ($3K-$5K/month) — The data trust, enablement, and extending the work to other parts of the business. The AI layer runs daily: monitors KPIs, detects anomalies, generates briefs. The consultant reviews monthly, provides strategic context, adjusts the system. The client gets continuous intelligence and human judgment.
+4. **Ongoing AI CoS** ($3K-$5K/month) — The product. The AI layer runs daily: monitors KPIs, detects anomalies, generates briefs. The consultant reviews monthly, provides strategic context, adjusts the system. The client gets continuous intelligence and human judgment.
 
-The arc moves us from vendor (waiting for a scoped project) to partner (the one who helped find where the value was in the first place).
+The arc moves us from vendor (waiting for a scoped project) to partner (the one who helped find where the value was in the first place). The engagement is the onboarding. The AI CoS is the product. The retainer is the relationship.
 
 ---
 
