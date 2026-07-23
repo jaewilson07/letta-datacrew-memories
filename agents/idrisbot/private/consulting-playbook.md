@@ -17,14 +17,16 @@ Jae Wilson is a builder-consultant. He can research and solve any problem you po
 
 ## Engagement Types
 
-### 1. AI Chief of Staff (AI CoS)
-Jae's flagship offering. See [[agents/idrisbot/private/ai-cos-framework]] for the full framework.
+### 1. FDE Engagement (The Product)
+Jae's flagship offering. The product is the FDE engagement — a Forward Deployed Engineering engagement that starts with a free sprint (assessment) and compounds through the FDE loop (audit → evals → deploy → observe → improve → loop runs again). See [[agents/idrisbot/private/ai-cos-framework]] for the full framework.
+
+**AI CoS is a feature of the FDE engagement**, not the product itself. The sprint is the free onramp. Quick wins (second brain, personal agent infra) are the first deployables. AI CoS is the ongoing intelligence system built from what the sprint revealed.
 
 ### 2. Domo Optimization
-Leveraging Jae's deep Domo expertise. Health checks, performance tuning, architecture review.
+Leveraging Jae's deep Domo expertise. Health checks, performance tuning, architecture review. Domo is the wedge — the first deployment platform — not the ceiling.
 
 ### 3. Data Architecture Advisory
-Strategic guidance on data platform decisions. Often a precursor to AI CoS.
+Strategic guidance on data platform decisions. Often a precursor to the FDE engagement sprint.
 
 ### 4. Custom Development
 Building specific solutions (pipelines, dashboards, integrations). Typically scoped projects.
@@ -39,10 +41,14 @@ Building specific solutions (pipelines, dashboards, integrations). Typically sco
 
 ## Forcing Questions by Engagement Type
 
-### AI CoS
+### FDE Engagement
+- "The documented process is rarely the real process — can we map how this actually works?"
+- "Who's the one person who knows how this really works? What happens if they leave?"
 - "What would your team do with 20 hours per week back?"
 - "If you had perfect information about [X], what decision would you make differently?"
 - "What's the one report your CEO asks for that takes 3 days to produce?"
+- "What's worth automating vs. what isn't? Where's the ROI?"
+- "You're not buying AI — you're buying a promotion. What win do you want on your performance review?"
 
 ### Domo Optimization
 - "How long does your most important dashboard take to load?"
